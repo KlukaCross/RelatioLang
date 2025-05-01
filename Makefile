@@ -5,3 +5,12 @@ build-python:
 
 ast:
 	antlr4-parse RelatioLangLexer.g4 RelatioLangParser.g4 parse -gui
+
+clean-python:
+	rm *.py
+
+clean-antlr4:
+	rm *.tokens *.interp
+
+run-python:
+	python main.py

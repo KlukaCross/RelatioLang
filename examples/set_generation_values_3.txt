@@ -1,0 +1,1 @@
+SET GENERATION VALUES gen_random_phone FOR contacts.phone;

@@ -1,3 +1,30 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 by Bart Kiers
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Project : sqlite-parser; an ANTLR4 grammar for SQLite https://github.com/bkiers/sqlite-parser
+ * Developed by:
+ *     Bart Kiers, bart@big-o.nl
+ *     Martin Mirchev, marti_2203@abv.bg
+ *     Mike Lische, mike@lischke-online.de
+ */
+
 // $antlr-format alignTrailingComments on, columnLimit 130, minEmptyLines 1, maxEmptyLinesToKeep 1, reflowComments off
 // $antlr-format useTab off, allowShortRulesOnASingleLine off, allowShortBlocksOnASingleLine on, alignSemicolons ownLine
 
@@ -16,7 +43,16 @@ sql_stmt_list
 ;
 
 sql_stmt
-    : graph_source
+    : graph_source_stmt
+    | include_edge_stmt
+    | exclude_edge_stmt
+    | no_enter_stmt
+    | no_exit_stmt
+    | limit_visits_stmt
+    | limit_distance_stmt
+    | transformer_stmt
+    | set_generation_values_stmt
+    | set_generation_amount_stmt
 ;
 
 signed_number
@@ -81,6 +117,7 @@ expr
 
 literal_value
     : NUMERIC_LITERAL
+    | INTEGER_LITERAL
     | STRING_LITERAL
     | BLOB_LITERAL
     | NULL_
@@ -99,8 +136,44 @@ values_clause
     : VALUES_ value_row (COMMA value_row)*
 ;
 
-graph_source
-    : GRAPH_ SOURCE_ table_name expr?
+graph_source_stmt
+    : GRAPH_ SOURCE_ table_name (WHERE_ expr)?
+;
+
+include_edge_stmt
+    : INCLUDE_ EDGE_ table_name DOT column_name table_name DOT column_name
+;
+
+exclude_edge_stmt
+    : EXCLUDE_ EDGE_ table_name DOT column_name table_name DOT column_name
+;
+
+no_enter_stmt
+    : NO_ ENTER_ table_name (WHERE_ expr)?
+;
+
+no_exit_stmt
+    : NO_ EXIT_ table_name (WHERE_ expr)?
+;
+
+limit_visits_stmt
+    : LIMIT_ VISITS_ INTEGER_LITERAL FOR_ table_name
+;
+
+limit_distance_stmt
+    : LIMIT_ DISTANCE_ INTEGER_LITERAL FOR_ table_name
+;
+
+transformer_stmt
+    : TRANSFORMER_ function_call FOR_ table_name DOT column_name (COMMA table_name DOT column_name)*
+;
+
+set_generation_values_stmt
+    : SET_ GENERATION_ VALUES_ (set_of_values | range_of_values | function_call) FOR_ table_name DOT column_name (COMMA table_name DOT column_name)*
+;
+
+set_generation_amount_stmt
+    : SET_ GENERATION_ AMOUNT_ table_name ASSIGN INTEGER_LITERAL (COMMA table_name ASSIGN INTEGER_LITERAL)*
 ;
 
 select_stmt
@@ -311,6 +384,18 @@ column_alias
     | STRING_LITERAL
 ;
 
+function_call
+    : function_name (OPEN_PAR literal_value (COMMA literal_value)* CLOSE_PAR)?
+;
+
+set_of_values
+    : OPEN_CUR literal_value (COMMA literal_value)* CLOSE_CUR
+;
+
+range_of_values
+    : OPEN_SQR INTEGER_LITERAL COLON INTEGER_LITERAL CLOSE_SQR
+;
+
 keyword
     : ALL_
     | AND_
@@ -399,6 +484,16 @@ keyword
     | EXCLUDE_
     | GRAPH_
     | SOURCE_
+    | INCLUDE_
+    | EDGE_
+    | EXIT_
+    | ENTER_
+    | VISITS_
+    | DISTANCE_
+    | TRANSFORMER_
+    | SET_
+    | GENERATION_
+    | AMOUNT_
 ;
 
 name

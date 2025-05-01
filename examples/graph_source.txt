@@ -1,1 +1,1 @@
-GRAPH SOURCE table;
+GRAPH SOURCE users;

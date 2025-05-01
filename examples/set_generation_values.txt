@@ -1,0 +1,1 @@
+SET GENERATION VALUES {'Anton', 'Anatoliy'} FOR users.name;

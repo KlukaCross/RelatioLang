@@ -1,0 +1,1 @@
+SET GENERATION AMOUNT users=5, contacts=5;
